@@ -1,0 +1,11 @@
+use_query_bitmap:
+    upd_heavy:61
+    ins_heavy:76
+    dist_shift:67
+    static:76
+
+baseline_epoch20:
+    upd_heavy:2
+    ins_heavy:4
+    dist_shift:3
+    static:5

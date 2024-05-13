@@ -1,0 +1,5 @@
+import os
+os.system(('CUDA_VISIBLE_DEVICES=1 python train.py --model ALECE --data STATS --batch_size 64 --wl_type upd_heavy --use_query_bitmap 2 --n_epoch 80 --experiments_dir ../res/20240513/use_query_randombitmap_epoch80'))
+os.system(('CUDA_VISIBLE_DEVICES=1 python train.py --model ALECE --data STATS --batch_size 64 --wl_type ins_heavy --use_query_bitmap 2 --n_epoch 80 --experiments_dir ../res/20240513/use_query_randombitmap_epoch80'))
+os.system(('CUDA_VISIBLE_DEVICES=1 python train.py --model ALECE --data STATS --batch_size 64 --wl_type dist_shift --use_query_bitmap 2 --n_epoch 80 --experiments_dir ../res/20240513/use_query_randombitmap_epoch80'))
+os.system(('CUDA_VISIBLE_DEVICES=1 python train.py --model ALECE --data STATS --batch_size 64 --wl_type static --use_query_bitmap 2 --n_epoch 80 --experiments_dir ../res/20240513/use_query_randombitmap_epoch80'))
