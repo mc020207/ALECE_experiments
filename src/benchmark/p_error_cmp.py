@@ -5,7 +5,7 @@ from src.arg_parser import arg_parser
 from src.utils import file_utils, FileViewer, pg_utils, arg_parser_utils
 import numpy as np
 import e2e_eval
-
+from tqdm import tqdm
 
 
 def hints_gen_exec(args, costs_path, hints_path):
@@ -29,10 +29,10 @@ def hints_gen_exec(args, costs_path, hints_path):
 
     try:
         for setting_sql in setting_sqls:
-            # print('setting_sql =', setting_sql)
+            print('setting_sql =', setting_sql)
             cur.execute(setting_sql)
             conn.commit()
-        for i, sql in enumerate(sqls):
+        for i, sql in tqdm(enumerate(sqls)):
             if sql.startswith('insert') or sql.startswith('delete') or sql.startswith('update'):
                 cur.execute(sql)
                 conn.commit()
@@ -109,7 +109,7 @@ def p_error_exec(args, costs_path, hints_path):
 
         cur.execute('LOAD \'pg_hint_plan\';')
         query_count = 0
-        for i, sql in enumerate(sqls):
+        for i, sql in tqdm(enumerate(sqls)):
             if sql.startswith('insert') or sql.startswith('delete') or sql.startswith('update'):
                 cur.execute(sql)
                 conn.commit()
@@ -168,7 +168,7 @@ def calc_p_error(args):
 
     costs_path = os.path.join(p_error_dir, costs_fname)
     hints_path = os.path.join(hints_dir, hints_fname)
-
+    print(costs_path,hints_path)
     require_hints_gen = True
     if args.model == 'optimal':
         if os.path.exists(costs_path):
@@ -192,4 +192,4 @@ if __name__ == '__main__':
     calc_p_error(args)
     # calc_p_error(args, db_task='p_error')
 
-# python benchmark/p_error_cmp.py --data STATS --wl_type ins_heavy --model attn --ignore_single_cards 0
+# python3 benchmark/p_error_cmp.py --data STATS --wl_type ins_heavy --model baseline --ignore_single_cards 0

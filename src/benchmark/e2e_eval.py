@@ -9,7 +9,7 @@ sys.path.append("../")
 from src.utils import string_utils, FileViewer, file_utils, pg_utils, arg_parser_utils
 from src.arg_parser import arg_parser
 from decimal import Decimal
-
+from tqdm import tqdm
 
 def get_test_sqls_and_copy_sqls(workload_lines):
     init_copy_sqls = []
@@ -165,14 +165,14 @@ def get_setting_sqls(args, join_est_no, single_est_no, ignore_single_cards=True,
     if (db_task == 'query_exec' or db_task == 'p_error' or db_task == 'hints_gen') and args.model != 'pg':
         setting_sqls.append('SET read_join_cards=true;')
         setting_sqls.append('SET join_read_flag=1;')
-
+        # print('sajdla')
         if args.test_wl_type != 'static':
             method_joinest_fname = f'{args.model}_{args.data}_{train_wl_type_pre}_{test_wl_type_pre}.txt'
         else:
             method_joinest_fname = f'{args.model}_{args.data}_static.txt'
 
         method_joinest_path = os.path.join(args.db_data_dir, method_joinest_fname)
-        # print('method_joinest_path =', method_joinest_path)
+        print('method_joinest_path =', method_joinest_path)
         assert os.path.exists(method_joinest_path)
         set_method_joinest_fname = 'SET join_cards_fname=\'{0:s}\';'.format(method_joinest_fname)
 
@@ -187,9 +187,10 @@ def get_setting_sqls(args, join_est_no, single_est_no, ignore_single_cards=True,
             setting_sqls.extend(single_cards_read_sqls)
     elif args.db_task == 'pg_card_access':
         setting_sqls.append('SET write_pg_card_estimates=true;')
-        setting_sqls.append(f'SET pg_join_cards_fname=\'{pg_cards_path}\';')
+        setting_sqls.append(f'SET pg_join_cards_fname=\"{pg_cards_path}\";')
+        setting_sqls.append(f'SET pg_single_cards_fname=\"{(pg_cards_path)+"copy"}\";')
 
-    timeout = 1000 * 3600
+    timeout = 1000 * 3600 * 10
     set_timeout = f'SET statement_timeout = {timeout};'
     setting_sqls.append(set_timeout)
 
@@ -221,83 +222,85 @@ def run_workload(args):
     single_tbl_no = 0
 
     total_time = 0
-
     ignore_single_cards = judge_if_ignore_single_cards(args)
-    try:
-        setting_sqls = get_setting_sqls(args, 0, 0, ignore_single_cards)
-        for setting_sql in setting_sqls:
-            cur.execute(setting_sql)
-            conn.commit()
-
-        if args.db_task == 'query_exec':
-            for i, sql in enumerate(sqls):
-                if sql.startswith('insert') or sql.startswith('delete') or sql.startswith('update'):
-                    try:
-                        cur.execute(sql)
-                        conn.commit()
-                    except:
-                        print(f'line-{i+1}, sql = {sql}')
-                        raise Exception()
-
-                else:
-                    assert sql.startswith('select')
-
-                    terms = sql.split('||')
-                    query = terms[0]
-                    test_query_no = int(terms[1])
-
-                    print('{0:d}, {1:d}, {2:d}, query = {3:s}'.format(test_query_count, i, test_query_no, sql))
-                    if (not ignore_single_cards) and (not if_static_workload):
-                        single_cards_read_sqls = get_single_cards_read_sqls(args, single_tbl_no)
-                        for setting_sql in single_cards_read_sqls:
-                            cur.execute(setting_sql)
-                            conn.commit()
-
-                    start_i = time.time()
-                    try:
-                        cur.execute(query)
-                        res = cur.fetchall()
-                        card = res[0][0]
-                    except:
-                        card = -1
-                    stop_i = time.time()
-                    t_i = stop_i - start_i
-                    total_time += t_i
-                    results.append((card, t_i, test_query_no))
-                    if (not ignore_single_cards) and (not if_static_workload):
-                        for cancel_setting_sql in cancel_setting_sqls:
-                            cur.execute(cancel_setting_sql)
-                            conn.commit()
-
-                    if args.wl_type != 'static':
-                        single_tbl_no += num_single_tbls_list[test_query_count]
-
-                    test_query_count += 1
-
-        elif args.db_task == 'pg_card_access':
-            id = 0
-            for i, sql in enumerate(sqls):
-                if sql.startswith('insert') or sql.startswith('delete') or sql.startswith('update'):
+    # try:
+    setting_sqls = get_setting_sqls(args, 0, 0, ignore_single_cards)
+    first=True
+    # print(setting_sqls)
+    if args.db_task == 'query_exec':
+        for i, sql in enumerate(sqls):
+            if sql.startswith('insert') or sql.startswith('delete') or sql.startswith('update'):
+                try:
                     cur.execute(sql)
                     conn.commit()
-                else:
-                    assert sql.startswith('select')
+                except:
+                    print(f'line-{i+1}, sql = {sql}')
+                    raise Exception()
 
-                    print('{0:d}, {1:d}, query = {2:s}'.format(id, i, sql))
-                    terms = sql.split('||')
-                    query = terms[0]
-                    raw_id = int(terms[1])
-                    cur.execute("SET mainquery_no={0:d}".format(raw_id))
-                    cur.execute("EXPLAIN (FORMAT JSON) " + query)
+            else:
+                assert sql.startswith('select')
+                if first:
+                    for setting_sql in setting_sqls:
+                        cur.execute(setting_sql)
+                        conn.commit()
+                    first=False
+                terms = sql.split('||')
+                query = terms[0]
+                test_query_no = int(terms[1])
+
+                # print('{0:d}, {1:d}, {2:d}, query = {3:s}'.format(test_query_count, i, test_query_no, sql))
+                if (not ignore_single_cards) and (not if_static_workload):
+                    single_cards_read_sqls = get_single_cards_read_sqls(args, single_tbl_no)
+                    for setting_sql in single_cards_read_sqls:
+                        cur.execute(setting_sql)
+                        conn.commit()
+
+                start_i = time.time()
+                try:
+                    cur.execute(query)
                     res = cur.fetchall()
-                    id_raw_id_map[id] = raw_id
-                    # cur.execute("SET subquery_no=0")
-                    test_queries.append(query.strip())
-                    id += 1
+                    card = res[0][0]
+                except:
+                    card = -1
+                stop_i = time.time()
+                t_i = stop_i - start_i
+                total_time += t_i
+                print(test_query_count+1,"th finish ans=",res," time=",t_i)
+                results.append((card, t_i, test_query_no))
+                if (not ignore_single_cards) and (not if_static_workload):
+                    for cancel_setting_sql in cancel_setting_sqls:
+                        cur.execute(cancel_setting_sql)
+                        conn.commit()
 
-    finally:
-        cur.close()
-        conn.close()
+                if args.wl_type != 'static':
+                    single_tbl_no += num_single_tbls_list[test_query_count]
+
+                test_query_count += 1
+
+    elif args.db_task == 'pg_card_access':
+        id = 0
+        for i, sql in tqdm(enumerate(sqls)):
+            if sql.startswith('insert') or sql.startswith('delete') or sql.startswith('update'):
+                cur.execute(sql)
+                conn.commit()
+            else:
+                assert sql.startswith('select')
+
+                # print('{0:d}, {1:d}, query = {2:s}'.format(id, i, sql))
+                terms = sql.split('||')
+                query = terms[0]
+                raw_id = int(terms[1])
+                cur.execute("SET mainquery_no={0:d}".format(raw_id))
+                cur.execute("EXPLAIN (FORMAT JSON) " + query)
+                res = cur.fetchall()
+                id_raw_id_map[id] = raw_id
+                # cur.execute("SET subquery_no=0")
+                test_queries.append(query.strip())
+                id += 1
+
+    # finally:
+    #     cur.close()
+    #     conn.close()
     return total_time, results, test_queries, id_raw_id_map
 
 
@@ -311,7 +314,7 @@ if __name__ == '__main__':
     train_wl_type_pre, test_wl_type_pre, pg_cards_fname = arg_parser_utils.get_wl_type_pre_and_pg_cards_paths(args)
 
     pg_utils.database_init(args, static_workload=if_static_workload)
-
+    
     if args.db_task == 'pg_card_access':
         pg_cards_path = os.path.join(args.db_data_dir, pg_cards_fname)
         if os.path.exists(pg_cards_path):
@@ -349,4 +352,4 @@ if __name__ == '__main__':
             lines.extend([f'{s[0]}, {Decimal(s[1]).quantize(Decimal("0.00"))}, {s[2]}\n' for s in results])
             file_utils.write_all_lines(results_path, lines)
 
-# python benchmark/e2e_eval.py --db_task query_exec --data STATS --wl_type ins_heavy --model optimal
+# python3 benchmark/e2e_eval.py --db_task query_exec --data STATS --wl_type ins_heavy --model optimal

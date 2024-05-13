@@ -6,12 +6,12 @@ sys.path.append("../")
 from . import file_utils, FileViewer, arg_parser_utils
 # import file_utils, FileViewer
 
-PG_USER = '$PG_USER$'
+PG_USER = 'macheng'
 
-def db_conn_str(db_name, port=4321):
+def db_conn_str(db_name, port=5432):
     return f'dbname={db_name} user={PG_USER} host=localhost port={port}'
 
-def get_db_conn(db_name, port=4321):
+def get_db_conn(db_name, port=5432):
     conn_str = db_conn_str(db_name, port)
     conn = psycopg2.connect(conn_str)
     conn.set_client_encoding('UTF8')
@@ -20,7 +20,7 @@ def get_db_conn(db_name, port=4321):
 
 
 def drop_dbs(db_name_prefix):
-    port = 4321
+    port = 5432
     conn = get_db_conn("postgres", port)
     cur = conn.cursor()
     cur.execute("SELECT datname FROM pg_database;")
@@ -37,7 +37,7 @@ def drop_dbs(db_name_prefix):
 
 def drop_db(db_name):
     assert (db_name != 'postgres')
-    port = 4321
+    port = 5432
     conn = get_db_conn("postgres", port)
     cur = conn.cursor()
     cur.execute("SELECT datname FROM pg_database;")
@@ -54,7 +54,7 @@ def drop_db(db_name):
 
 def detect_db_exists(db_name):
     assert (db_name != 'postgres')
-    port = 4321
+    port = 5432
     conn = get_db_conn("postgres", port)
     cur = conn.cursor()
     cur.execute("SELECT datname FROM pg_database;")
@@ -76,7 +76,7 @@ def db_create_multi_thread(n_machines, n_threads, machine_id, thread_id, db_name
 
 def db_create(db_name):
     assert (db_name != 'postgres')
-    port = 4321
+    port = 5432
     conn = get_db_conn("postgres", port)
     cur = conn.cursor()
     cur.execute("SELECT datname FROM pg_database;")
@@ -96,7 +96,7 @@ def db_create(db_name):
 
 
 def create_tables(db_name, create_tables_path):
-    port = 4321
+    port = 5432
     conn = get_db_conn(db_name, port)
     cur = conn.cursor()
     sqls = file_utils.read_all_lines(create_tables_path)
@@ -141,7 +141,7 @@ def database_init(args, static_workload=False):
             conn = get_db_conn(args.db_name)
             cur = conn.cursor()
 
-            # conn_str = pg_utils.db_conn_str(db_name, 4321)
+            # conn_str = pg_utils.db_conn_str(db_name, 5432)
             # conn = psycopg2.connect(conn_str)
             # conn.set_client_encoding('UTF8')
             # conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)

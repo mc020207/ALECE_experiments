@@ -48,7 +48,7 @@ def get_stats_arg_parser():
                         help='its path is os.path.join(args.data_dir, args.tables_info_file)')
 
     # ----------------------------------- DB Params -----------------------------------
-    parser.add_argument('--db_data_dir', type=str, default='$PG_DATADIR$', help='')
+    parser.add_argument('--db_data_dir', type=str, default='/home/macheng/pg_data', help='')
     parser.add_argument('--db_name', type=str, default='', help='')
     parser.add_argument('--db_subqueries_fname', type=str, default='join_sub_queries.txt', help='')
     parser.add_argument('--db_single_tbls_fname', type=str, default='single_sub_queries.txt', help='')

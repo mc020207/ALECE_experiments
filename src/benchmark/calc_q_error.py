@@ -35,38 +35,38 @@ def process_error_val(val):
     return f'${a_str}$$\\cdot$$10^{exponent}$'
 
 
-def calc_p_error(args, test_wl_type=None, model=None):
+def calc_q_error(args, test_wl_type=None, model=None):
     if test_wl_type is None:
         test_wl_type = args.test_wl_type
     if model is None:
         model = args.model
-    p_error_dir, _ = arg_parser_utils.get_p_q_error_dir(args,test_wl_type)
+    _, q_error_dir = arg_parser_utils.get_p_q_error_dir(args,test_wl_type)
     fname = f'{model}.npy'
-    model_errors_path = os.path.join(p_error_dir, fname)
+    model_errors_path = os.path.join(q_error_dir, fname)
     if os.path.exists(model_errors_path) == False:
         print(f'{model_errors_path} does not exist')
         return None
 
-    optimal_errors_path = os.path.join(p_error_dir, 'optimal.npy')
+    optimal_errors_path = os.path.join(q_error_dir, 'optimal.npy')
     assert os.path.exists(optimal_errors_path)
 
-    model_errors = np.load(model_errors_path)
-    optimal_errors = np.load(optimal_errors_path)
+    model_errors = np.load(model_errors_path)+1e-8
+    optimal_errors = np.load(optimal_errors_path)+1e-8
 
     min_e = np.min(optimal_errors)
     assert min_e > 0
     model_errors = np.clip(model_errors, a_min=min_e, a_max=1e25)
-    p_error_test = eval_utils.generic_calc_q_error(model_errors, optimal_errors)
-    p_error_test = np.sort(p_error_test)
-    n = p_error_test.shape[0]
-    # print(f'p_error.shape = {p_error_test.shape}')
+    q_error_test = eval_utils.generic_calc_q_error(model_errors, optimal_errors)
+    q_error_test = np.sort(q_error_test)
+    n = q_error_test.shape[0]
+    # print(f'q_error.shape = {q_error_test.shape}')
     ratios = [0.5, 0.9, 0.95, 0.99]
 
     error_vals = []
     for ratio in ratios:
         idx = int(n * ratio)
         # print(f'idx = {idx}')
-        error_vals.append(p_error_test[idx])
+        error_vals.append(q_error_test[idx])
 
     # print(error_vals)
     results = []
@@ -79,7 +79,7 @@ def calc_p_error(args, test_wl_type=None, model=None):
 
 if __name__ == '__main__':
     args = arg_parser.get_arg_parser()
-    error_vals = calc_p_error(args)
+    error_vals = calc_q_error(args)
     print(error_vals)
 
 

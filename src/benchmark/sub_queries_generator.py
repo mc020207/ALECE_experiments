@@ -50,10 +50,10 @@ def generate_sub_queries_with_pg(args):
         raise Exception()
     stop = time.time()
 
-    assert (os.path.exists(db_subqueries_path))
-    shutil.move(db_subqueries_path, sub_queries_path)
-    assert (os.path.exists(db_single_tbls_path))
-    shutil.move(db_single_tbls_path, single_tbls_path)
+    # assert (os.path.exists(db_subqueries_path))
+    # shutil.move(db_subqueries_path, sub_queries_path)
+    # assert (os.path.exists(db_single_tbls_path))
+    # shutil.move(db_single_tbls_path, single_tbls_path)
     print('time =', stop - start)
 
 if __name__ == '__main__':
