@@ -41,10 +41,13 @@ mskmp={"upd_heavy": [133,21,139,31,29,14,5,117,80,82],
 for mod in mods:
     print("****************",mod,"****************")
     work_load_path="data/STATS/workload/"+mod+"/workload.sql"
-    true_card_path="query_true_card_"+mod+".txt"
+    true_card_path="txt/query_true_card_"+mod+".txt"
     msk=get_important_idx(mod,work_load_path,true_card_path)
     for idx in range(160):
-        path="res/multiepoch/use_query_bitmap_0/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod+".txt"
+        if mod!= "static":
+            path="res//20240513/use_query_randombitmap_epoch80/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod.split("_")[0]+"_"+mod.split("_")[0]+".txt"
+        else:
+            path="res//20240513/use_query_randombitmap_epoch80/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod+".txt"
         # path="res/baseline_epoch20_"+str(idx)+"/e2e/ALECE_STATS_"+mod+".txt"
         if not os.path.exists(path):
             continue

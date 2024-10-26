@@ -59,7 +59,7 @@ def train_with_batch(model, args, train_data, validation_data, curr_ckpt_step, t
                 ckpt_step = curr_ckpt_step + epoch
                 model.save(ckpt_step)
                 best_loss = loss
-                pred_record(model,args,test_data,q_error_dir,epoch)
+                # pred_record(model,args,test_data,q_error_dir,epoch)
             print(f'Epoch-{epoch}, loss = {loss}, best_loss = {best_loss}')
         else:
             print(f'Epoch-{epoch}')
@@ -292,22 +292,22 @@ if __name__ == '__main__':
 
     ckpt_step = model.restore().numpy()
     assert ckpt_step >= 0
-    # start=time.time()
-    # preds = eval(model, args, test_data, q_error_dir)
-    # print(time.time()-start)
-    # # ====================================================
-    # preds = preds.tolist()
-    # workload_dir = arg_parser_utils.get_workload_dir(args, test_wl_type)
-    # e2e_dir = os.path.join(args.experiments_dir, args.e2e_dirname)
-    # FileViewer.detect_and_create_dir(e2e_dir)
-    # train_wl_type_pre, test_wl_type_pre, pg_cards_path = arg_parser_utils.get_wl_type_pre_and_pg_cards_paths(args)
+    start=time.time()
+    preds = eval(model, args, test_data, q_error_dir)
+    print(time.time()-start)
+    # ====================================================
+    preds = preds.tolist()
+    workload_dir = arg_parser_utils.get_workload_dir(args, test_wl_type)
+    e2e_dir = os.path.join(args.experiments_dir, args.e2e_dirname)
+    FileViewer.detect_and_create_dir(e2e_dir)
+    train_wl_type_pre, test_wl_type_pre, pg_cards_path = arg_parser_utils.get_wl_type_pre_and_pg_cards_paths(args)
 
-    # if test_wl_type == 'static':
-    #     path = os.path.join(e2e_dir, f'{args.model}_{args.data}_static.txt')
-    # else:
-    #     path = os.path.join(e2e_dir, f'{args.model}_{args.data}_{train_wl_type_pre}_{test_wl_type_pre}.txt')
+    if test_wl_type == 'static':
+        path = os.path.join(e2e_dir, f'{args.model}_{args.data}_static.txt')
+    else:
+        path = os.path.join(e2e_dir, f'{args.model}_{args.data}_{train_wl_type_pre}_{test_wl_type_pre}.txt')
 
-    # lines = [(str(x) + '\n') for x in preds]
-    # file_utils.write_all_lines(path, lines)
+    lines = [(str(x) + '\n') for x in preds]
+    file_utils.write_all_lines(path, lines)
 
 # python train.py --model ALECE --batch_size 128 --keep_train 0 --gpu 1 --data STATS --wl_type ins_heavy

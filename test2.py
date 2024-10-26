@@ -32,7 +32,8 @@ def get_important_idx(mod,work_load_path,true_card_path):
             nowidx+=1
     return msk
 
-methods=["use_query_bitmap","baseline","pg"]
+methods=["use_query_bitmap","baseline","use_query_randombitmap"]
+# methods=["use_query_bitmap_epoch80","use_query_bitmap_epoch150","baseline_epoch20"]
 mods=["upd_heavy","ins_heavy","dist_shift","static"]
 mskmp={"upd_heavy": [133,21,139,31,29,14,5,117,80,82],
        "ins_heavy": [42,32,116,40,115,22,66,9,58,125],
@@ -43,7 +44,7 @@ mskmp={"upd_heavy": [133,21,139,31,29,14,5,117,80,82],
 for mod in mods:
     print("****************",mod,"****************")
     work_load_path="data/STATS/workload/"+mod+"/workload.sql"
-    true_card_path="query_true_card_"+mod+".txt"
+    true_card_path="txt/query_true_card_"+mod+".txt"
     cards=np.load("data/STATS/workload/"+mod+"/features/all_cards.npy")
     test_id=np.load("data/STATS/workload/"+mod+"/features/test_sub_idxes.npy")
     tot=len(test_id)
@@ -51,13 +52,13 @@ for mod in mods:
     msk=get_important_idx(mod,work_load_path,true_card_path)
     for method in methods:
         # path="res/multiepoch/use_query_bitmap_0/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod+".txt"
-        path="res/important/"+method+"/e2e/ALECE_STATS_"+mod+".txt"
-        if method=='pg':
-            path="res/important/"+method+"/pg_STATS_"+mod+".txt"
-        # if mod!= "static":
-        #     path="res/20240422/"+method+"/e2e/ALECE_STATS_"+mod.split("_")[0]+"_"+mod.split("_")[0]+".txt"
-        # else:
-        #     path="res/20240422/"+method+"/e2e/ALECE_STATS_static.txt"
+        # path="res/important/"+method+"/e2e/ALECE_STATS_"+mod+".txt"
+        # if method=='pg':
+        #     path="res/important/"+method+"/pg_STATS_"+mod+".txt"
+        if mod!= "static":
+            path="res/20240516/"+method+"/e2e/ALECE_STATS_"+mod.split("_")[0]+"_"+mod.split("_")[0]+".txt"
+        else:
+            path="res/20240516/"+method+"/e2e/ALECE_STATS_static.txt"
         print(path)
         if not os.path.exists(path):
             continue

@@ -245,7 +245,7 @@ def _load_data_from_workload(args, wl_type=None):
             all_features=np.concatenate([all_features, bitmap], axis=1)
         elif args.use_query_bitmap == 2:
             bitmap=np.load(randombitmap_path)
-        all_features=np.concatenate([all_features, bitmap], axis=1)
+            all_features=np.concatenate([all_features, bitmap], axis=1)
         return (all_features, all_cards, all_num_inserts, train_idxes, train_sub_idxes, test_idxes, test_sub_idxes, test_single_idxes, meta_infos)
 
     tables_info = get_tables_info(args)
