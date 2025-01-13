@@ -208,7 +208,7 @@ def _load_data_from_workload(args, wl_type=None):
     all_features_path = os.path.join(feature_data_dir, 'all_features.npy')
     all_cards_path = os.path.join(feature_data_dir, 'all_cards.npy')
     all_num_inserts_path = os.path.join(feature_data_dir, 'all_num_inserts.npy')
-    bitmap_path = os.path.join(feature_data_dir, 'bitmap.npy')
+    # bitmap_path = os.path.join(feature_data_dir, 'bitmap.npy')
     randombitmap_path = os.path.join(feature_data_dir, 'randombitmap.npy')
     train_idxes_path = os.path.join(feature_data_dir, 'train_idxes.npy')
     train_sub_idxes_path = os.path.join(feature_data_dir, 'train_sub_idxes.npy')
@@ -241,6 +241,8 @@ def _load_data_from_workload(args, wl_type=None):
         meta_infos = np.load(meta_infos_path).tolist()
         # [histogram_feature_dim, num_attrs, n_possible_joins] = meta_infos
         if args.use_query_bitmap == 1:
+            bitmap_path = 'bitmap_'+str(args.bitmap_size)+'.npy'
+            bitmap_path = os.path.join(feature_data_dir, bitmap_path)
             bitmap=np.load(bitmap_path)
             all_features=np.concatenate([all_features, bitmap], axis=1)
         elif args.use_query_bitmap == 2:
@@ -388,6 +390,8 @@ def _load_data_from_workload(args, wl_type=None):
 
     # [histogram_feature_dim, num_attrs, n_possible_joins] = meta_infos
     if args.use_query_bitmap == 1:
+        bitmap_path = 'bitmap_'+str(args.bitmap_size)+'.npy'
+        bitmap_path = os.path.join(feature_data_dir, bitmap_path)
         bitmap=np.load(bitmap_path)
         all_features=np.concatenate([all_features, bitmap], axis=1)
     elif args.use_query_bitmap == 2:
