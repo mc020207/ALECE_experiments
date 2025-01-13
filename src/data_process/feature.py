@@ -400,21 +400,28 @@ def _load_data_from_workload(args, wl_type=None):
 
     return (all_features, all_cards, all_num_inserts, train_idxes, train_sub_idxes, test_idxes, test_sub_idxes, test_single_idxes, meta_infos.tolist())
 
-def normalize_data(train_features, test_features_list, histogram_feature_dim, n_possible_joins):
-    train_query_features = train_features[:, histogram_feature_dim:]
+def normalize_data(train_features, test_features_list, histogram_feature_dim, query_feature_dim, n_possible_joins):
+    train_query_features = train_features[:, histogram_feature_dim:histogram_feature_dim+query_feature_dim]
+    train_bitmap_features = train_features[:, histogram_feature_dim+query_feature_dim:]
     test_query_features_list = []
+    test_bitmap_features_list = []
     for test_features in test_features_list:
-        test_query_features = test_features[:, histogram_feature_dim:]
+        test_query_features = test_features[:, histogram_feature_dim:histogram_feature_dim+query_feature_dim]
+        test_bitmap_features = test_features[:, histogram_feature_dim+query_feature_dim:]
         test_query_features_list.append(test_query_features)
+        test_bitmap_features_list.append(test_bitmap_features)
     train_query_features, test_query_features_list, join_pattern_dim = normalize_query_features(train_query_features, test_query_features_list, n_possible_joins)
     query_feature_dim = train_query_features.shape[1]
     train_features[:, histogram_feature_dim:histogram_feature_dim+query_feature_dim] = train_query_features
-    train_features = train_features[:, 0:histogram_feature_dim+query_feature_dim]
+    train_features = train_features[:, :histogram_feature_dim+query_feature_dim]
+    print(train_features.shape,train_bitmap_features.shape)
+    train_features = np.concatenate([train_features, train_bitmap_features], axis=1, dtype=train_features.dtype)
     for i in range(len(test_query_features_list)):
         test_features = test_features_list[i]
         test_query_features = test_query_features_list[i]
-        test_features[:, histogram_feature_dim:histogram_feature_dim + query_feature_dim] = test_query_features
-        test_features = test_features[:, 0:histogram_feature_dim + query_feature_dim]
+        test_features[:, histogram_feature_dim:histogram_feature_dim+query_feature_dim] = test_query_features
+        test_features = test_features[:, :histogram_feature_dim + query_feature_dim]
+        test_features = np.concatenate([test_features, test_bitmap_features_list[i]], axis=1, dtype=test_features.dtype)
         test_features_list[i] = test_features
     return train_features, test_features_list, join_pattern_dim
 
@@ -439,7 +446,8 @@ def load_workload_data(args):
             assert meta_infos_2[i] == meta_infos[i]
 
     [histogram_feature_dim, num_attrs, n_possible_joins] = meta_infos
-
+    num_table=8
+    query_feature_dim=num_table+n_possible_joins+num_attrs*2
     train_features = all_features_1[train_idxes]
     train_sub_features = all_features_1[train_sub_idxes]
     all_train_features = np.concatenate([train_features, train_sub_features], axis=0, dtype=train_features.dtype)
@@ -466,8 +474,14 @@ def load_workload_data(args):
     # print('valid_idxes.shape =', valid_idxes.shape)
     # assert valid_idxes.shape[0] == test_single_tbls_cards.shape[0]
 
-
-    all_train_features, test_sub_features, join_pattern_dim = normalize_data(all_train_features, [test_sub_features], histogram_feature_dim, n_possible_joins)
+    for x in all_train_features[0,histogram_feature_dim:]:
+        print(x,end=' ')
+    print("\n\n\n\n\n")
+    all_train_features, test_sub_features, join_pattern_dim = normalize_data(all_train_features, [test_sub_features], histogram_feature_dim, query_feature_dim, n_possible_joins)
+    for x in all_train_features[0,histogram_feature_dim:]:
+        print(x,end=' ')
+    print("\n\n\n\n\n")
+    exit(0)
     # 在train的query_feature部分做正则化，随后按照test中的所有query_feature根据train的标准差和平均数做正则化
     # 删去所有在train中没有任何变化的特征
     test_sub_features = test_sub_features[0]

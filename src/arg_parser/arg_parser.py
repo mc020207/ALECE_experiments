@@ -128,7 +128,7 @@ def get_stats_arg_parser():
                         help='')
 
     # ----------------------------------- My changes -----------------------------------
-    parser.add_argument('--use_gpu', type=int, default=1, help='')
+    parser.add_argument('--use_gpu', type=int, default=0, help='')
     # parser.add_argument('--add_data_feature_join', type=int, default=0, help='')
     # parser.add_argument('--add_data_feature_Correlation', type=int, default=0, help='')
     parser.add_argument('--use_query_bitmap', type=int, default=1, help='0: do not use 1: use 2: use randombitmap')
