@@ -30,7 +30,7 @@ def get_important_idx(mod,work_load_path,true_card_path):
             nowidx+=1
     return msk
 
-methods=["use_query_bitmap","baseline"]
+methods=["baseline_epoch80","use_query_bitmap_100_epoch300"]
 mods=["upd_heavy","ins_heavy","dist_shift","static"]
 mskmp={"upd_heavy": [133,21,139,31,29,14,5,117,80,82],
        "ins_heavy": [42,32,116,40,115,22,66,9,58,125],
@@ -45,9 +45,9 @@ for mod in mods:
     msk=get_important_idx(mod,work_load_path,true_card_path)
     for idx in range(160):
         if mod!= "static":
-            path="res//20240513/use_query_randombitmap_epoch80/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod.split("_")[0]+"_"+mod.split("_")[0]+".txt"
+            path="res//20250116/use_query_randombitmap_epoch80/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod.split("_")[0]+"_"+mod.split("_")[0]+".txt"
         else:
-            path="res//20240513/use_query_randombitmap_epoch80/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod+".txt"
+            path="res//20250116/use_query_randombitmap_epoch80/epoch_"+str(idx)+"/e2e/ALECE_STATS_"+mod+".txt"
         # path="res/baseline_epoch20_"+str(idx)+"/e2e/ALECE_STATS_"+mod+".txt"
         if not os.path.exists(path):
             continue

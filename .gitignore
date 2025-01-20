@@ -139,3 +139,6 @@ src/debug
 txt
 res
 *.txt
+aaa.py
+autotrain.py
+autotrain*.py

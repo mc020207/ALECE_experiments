@@ -48,7 +48,7 @@ for mod in mods:
     meta_infos=np.load("../data/STATS/workload/"+mod+"/features/feature_meta_infos.npy")
     all_features=np.load("../data/STATS/workload/"+mod+"/features/all_features.npy")
     attr_range_conds_list=np.load("../data/STATS/workload/"+mod+"/features/attr_range_conds_list.npy")
-    [histogram_feature_dim, num_attrs, n_possible_joins] = meta_infos
+    [histogram_feature_dim, query_feature_dim, num_attrs, n_possible_joins] = meta_infos
     # print(table_num_attr)
     table_features = all_features[:, histogram_feature_dim:histogram_feature_dim+len(tables)]
     ans=np.zeros(shape=(all_features.shape[0],sample_num*len(tables)))

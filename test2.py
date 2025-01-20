@@ -33,7 +33,7 @@ def get_important_idx(mod,work_load_path,true_card_path):
     return msk
 
 # methods=["baseline","baseline_epoch80","use_query_bitmap_5","use_query_bitmap_10","use_query_bitmap_20","use_query_bitmap_50","use_query_bitmap_100","use_query_bitmap_200","use_query_bitmap_500"]
-methods=["use_query_randombitmap"]
+methods=["use_query_bitmap_100_epoch80","use_query_bitmap_100_epoch80_attn_head_key_dim_2048"]
 mods=["upd_heavy","ins_heavy","dist_shift","static"]
 mskmp={"upd_heavy": [133,21,139,31,29,14,5,117,80,82],
        "ins_heavy": [42,32,116,40,115,22,66,9,58,125],
@@ -56,10 +56,9 @@ for mod in mods:
         # if method=='pg':
         #     path="res/important/"+method+"/pg_STATS_"+mod+".txt"
         if mod!= "static":
-            path="res/20240516/"+method+"/e2e/ALECE_STATS_"+mod.split("_")[0]+"_"+mod.split("_")[0]+".txt"
+            path="res/20250118/"+method+"/e2e/ALECE_STATS_"+mod.split("_")[0]+"_"+mod.split("_")[0]+".txt"
         else:
-            path="res/20240516/"+method+"/e2e/ALECE_STATS_static.txt"
-        # print(path)
+            path="res/20250118/"+method+"/e2e/ALECE_STATS_static.txt"
         if not os.path.exists(path):
             continue
         print(method,end='\t')
